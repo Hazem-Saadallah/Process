@@ -6,8 +6,8 @@
 #include <Impl/Process.hxx>
 #include <vector>
 
-Process::Process(Datatype::ArgList args_list) : m_ArgList(args_list) { }
-Process::~Process() { if(m_WorkerThread.joinable()) m_WorkerThread.join(); }
+Impl::Process::Process(Datatype::ArgList args_list) : m_ArgList(args_list) { }
+Impl::Process::~Process() { if(m_WorkerThread.joinable()) m_WorkerThread.join(); }
 
 #if defined (__linux__)
 #include <poll.h>
@@ -16,7 +16,7 @@ Process::~Process() { if(m_WorkerThread.joinable()) m_WorkerThread.join(); }
 #include <sys/types.h>
 #include <sys/wait.h>
 
-void Process::exec_linux(bool sync) {
+void Impl::Process::exec_linux(bool sync) {
   std::int32_t stdout_pipe[2], stderr_pipe[2], exec_pipe[2];
   if(pipe(stdout_pipe) == -1) {
     m_Status = Process::Status::PIPE_FAILURE;
@@ -125,7 +125,7 @@ void Process::exec_windows(bool sync) {}
 
 #endif
 
-void Process::run(bool sync) {
+void Impl::Process::run(bool sync) {
 #if defined (__linux__)
   exec_linux(sync);
 
@@ -143,49 +143,49 @@ void Process::run(bool sync) {
 #endif
 }
 
-void Process::exec(bool sync) { run(sync); }
+void Impl::Process::exec(bool sync) { run(sync); }
 
 
-void Process::set_args(Datatype::ArgList args_list) { m_ArgList = args_list; }
-Datatype::ArgList Process::get_args() const { return m_ArgList; }
-bool Process::is_executable() const { return !m_ArgList.empty(); }
+void Impl::Process::set_args(Datatype::ArgList args_list) { m_ArgList = args_list; }
+Impl::Datatype::ArgList Impl::Process::get_args() const { return m_ArgList; }
+bool Impl::Process::is_executable() const { return !m_ArgList.empty(); }
 
-std::string Process::get_stdout() const {
+std::string Impl::Process::get_stdout() const {
   std::lock_guard<std::mutex> lock(m_Mutex);
   return m_Stdout;
 }
-std::string Process::get_stderr() const {
+std::string Impl::Process::get_stderr() const {
   std::lock_guard<std::mutex> lock(m_Mutex);
   return m_Stderr;
 }
 
-inline Process::FileSaveStatus save_to_file(const std::string& file_path, const std::string& data) {
+inline Impl::Process::FileSaveStatus save_to_file(const std::string& file_path, const std::string& data) {
   std::ofstream out_file(file_path, std::ios::out | std::ios::trunc);
-  if(!out_file.is_open()) return Process::FileSaveStatus::OPEN_FAILED;
+  if(!out_file.is_open()) return Impl::Process::FileSaveStatus::OPEN_FAILED;
 
   out_file.write(data.data(), data.size());
   if(out_file.fail() || out_file.bad()) {
     out_file.close();
-    return Process::FileSaveStatus::WRITE_FAILED;
+    return Impl::Process::FileSaveStatus::WRITE_FAILED;
   }
 
   out_file.close();
-  if(out_file.fail()) return Process::FileSaveStatus::CLOSE_FAILED;
+  if(out_file.fail()) return Impl::Process::FileSaveStatus::CLOSE_FAILED;
 
-  return Process::FileSaveStatus::SUCCESS;
+  return Impl::Process::FileSaveStatus::SUCCESS;
 }
 
-Process::FileSaveStatus Process::save_stdout(const std::string& file_path) const { return save_to_file(file_path, m_Stdout); }
-Process::FileSaveStatus Process::save_stderr(const std::string& file_path) const { return save_to_file(file_path, m_Stderr); }
+Impl::Process::FileSaveStatus Impl::Process::save_stdout(const std::string& file_path) const { return save_to_file(file_path, m_Stdout); }
+Impl::Process::FileSaveStatus Impl::Process::save_stderr(const std::string& file_path) const { return save_to_file(file_path, m_Stderr); }
 
-Process::Status Process::get_status() const {
+Impl::Process::Status Impl::Process::get_status() const {
   std::lock_guard<std::mutex> lock(m_Mutex);
   return m_Status;
 }
 
-std::int16_t Process::get_exit_code() const {
+std::int16_t Impl::Process::get_exit_code() const {
   std::lock_guard<std::mutex> lock(m_Mutex);
   return m_ExitCode;
 }
 
-pid_t Process::get_process_id() const { return m_PID; }
+pid_t Impl::Process::get_process_id() const { return m_PID; }

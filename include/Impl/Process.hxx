@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #endif
 
+namespace Impl {
 class Process {
 public:
   enum class Status : std::uint8_t {
@@ -33,7 +34,7 @@ private:
   Datatype::ArgList m_ArgList={};
   std::string m_Stdout{""};
   std::string m_Stderr{""};
-  std::int32_t m_ExitCode{0};
+  Impl::Datatype::ExitCode m_ExitCode{0};
   Status m_Status{Process::Status::UNINITIALIZED};
   pid_t m_PID{0};
   mutable std::mutex m_Mutex;
@@ -72,13 +73,14 @@ public:
   Datatype::ArgList get_args() const;
   bool is_executable() const;
 
-  std::string get_stdout() const;
-  std::string get_stderr() const;
+  Impl::Datatype::Stdout get_stdout() const;
+  Impl::Datatype::Stderr get_stderr() const;
 
   FileSaveStatus save_stdout(const std::string& file_path) const;
   FileSaveStatus save_stderr(const std::string& file_path) const;
 
   Status get_status() const;
-  std::int16_t get_exit_code() const;
+  Impl::Datatype::ExitCode get_exit_code() const;
   pid_t get_process_id() const;
 };
+}
