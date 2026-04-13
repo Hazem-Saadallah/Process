@@ -183,6 +183,36 @@ Impl::Process::Status Impl::Process::get_status() const {
   return m_Status;
 }
 
+std::string Impl::Process::get_status_string() const {
+  switch (m_Status) {
+    case Process::Status::UNINITIALIZED:
+      return std::string("Uninitialized");
+      break;
+    case Process::Status::RUNNING:
+      return std::string("Running");
+      break;
+    case Process::Status::FINISHED:
+      return std::string("Finished");
+      break;
+    case Process::Status::SIGNALED:
+      return std::string("Signaled");
+      break;
+    case Process::Status::EXIT_UNKNOWN:
+      return std::string("Exit Unknown");
+      break;
+    case Process::Status::PIPE_FAILURE:
+      return std::string("Pipe Failure");
+      break;
+    case Process::Status::FORK_FAILURE:
+      return std::string("Fork Failure");
+      break;
+    case Process::Status::EXECUTION_FAILURE:
+      return std::string("Execution Failure");
+      break;
+  }
+  return std::string("Unknown");
+}
+
 std::int16_t Impl::Process::get_exit_code() const {
   std::lock_guard<std::mutex> lock(m_Mutex);
   return m_ExitCode;

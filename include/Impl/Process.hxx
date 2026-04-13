@@ -80,6 +80,7 @@ public:
   FileSaveStatus save_stderr(const std::string& file_path) const;
 
   Status get_status() const;
+  std::string get_status_string() const;
   Impl::Datatype::ExitCode get_exit_code() const;
   pid_t get_process_id() const;
 };
